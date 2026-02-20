@@ -23,10 +23,11 @@
       "@ui": ["src/components/ui"],
       "@ui-pages": ["src/components/ui/pages"],
       "@utils-types": ["src/utils/types"],
-      "@api": ["src/utils/burger-api.ts"],
+      "@api": ["src/utils/burger-api"],
       "@slices": ["src/services/slices"],
       "@selectors": ["src/services/selectors"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }
