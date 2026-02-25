@@ -1,0 +1,77 @@
+{
+    "success": true,
+    "name": "Фалленианский антарианский флюоресцентный бургер",
+    "order": {
+        "ingredients": [
+            {
+                "_id": "643d69a5c3f7b9001cfa093d",
+                "name": "Флюоресцентная булка R2-D3",
+                "type": "bun",
+                "proteins": 44,
+                "fat": 26,
+                "carbohydrates": 85,
+                "calories": 643,
+                "price": 988,
+                "image": "https://code.s3.yandex.net/react/code/bun-01.png",
+                "image_mobile": "https://code.s3.yandex.net/react/code/bun-01-mobile.png",
+                "image_large": "https://code.s3.yandex.net/react/code/bun-01-large.png",
+                "__v": 0
+            },
+            {
+                "_id": "643d69a5c3f7b9001cfa0947",
+                "name": "Плоды Фалленианского дерева",
+                "type": "main",
+                "proteins": 20,
+                "fat": 5,
+                "carbohydrates": 55,
+                "calories": 77,
+                "price": 874,
+                "image": "https://code.s3.yandex.net/react/code/sp_1.png",
+                "image_mobile": "https://code.s3.yandex.net/react/code/sp_1-mobile.png",
+                "image_large": "https://code.s3.yandex.net/react/code/sp_1-large.png",
+                "__v": 0
+            },
+            {
+                "_id": "643d69a5c3f7b9001cfa0945",
+                "name": "Соус с шипами Антарианского плоскоходца",
+                "type": "sauce",
+                "proteins": 101,
+                "fat": 99,
+                "carbohydrates": 100,
+                "calories": 100,
+                "price": 88,
+                "image": "https://code.s3.yandex.net/react/code/sauce-01.png",
+                "image_mobile": "https://code.s3.yandex.net/react/code/sauce-01-mobile.png",
+                "image_large": "https://code.s3.yandex.net/react/code/sauce-01-large.png",
+                "__v": 0
+            },
+            {
+                "_id": "643d69a5c3f7b9001cfa093d",
+                "name": "Флюоресцентная булка R2-D3",
+                "type": "bun",
+                "proteins": 44,
+                "fat": 26,
+                "carbohydrates": 85,
+                "calories": 643,
+                "price": 988,
+                "image": "https://code.s3.yandex.net/react/code/bun-01.png",
+                "image_mobile": "https://code.s3.yandex.net/react/code/bun-01-mobile.png",
+                "image_large": "https://code.s3.yandex.net/react/code/bun-01-large.png",
+                "__v": 0
+            }
+        ],
+        "_id": "696ced5ea64177001b327cc5",
+        "owner": {
+            "name": "arslddd",
+            "email": "arsldr@dks.ru",
+            "createdAt": "2026-01-05T16:35:08.582Z",
+            "updatedAt": "2026-01-07T15:49:27.773Z"
+        },
+        "status": "done",
+        "name": "Фалленианский антарианский флюоресцентный бургер",
+        "createdAt": "2026-01-18T14:25:34.918Z",
+        "updatedAt": "2026-01-18T14:25:35.142Z",
+        "number": 99145,
+        "price": 2938
+    }
+}

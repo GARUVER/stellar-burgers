@@ -7,22 +7,6 @@ import {
 } from '../../utils/burger-api';
 import { TOrder } from '../../utils/types';
 
-// Тип для ответа от API создания заказа (основан на структуре из burger-api)
-type TCreateOrderApiResponse = {
-  success: boolean;
-  order: {
-    _id: string;
-    number: number;
-    name: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
-    // Другие поля, которые приходят с сервера
-  };
-  name: string;
-};
-
-// Типы для состояния
 type TCreateOrderState = {
   orderData: TOrder | null;
   orderNumber: number | null;
@@ -30,119 +14,62 @@ type TCreateOrderState = {
   error: string | null;
 };
 
-type TFeedOrdersState = {
+export type TFeedOrdersState = {
   orders: TOrder[];
   total: number;
   totalToday: number;
   currentOrder: TOrder | null;
 };
 
-type TOrderState = TCreateOrderState & TFeedOrdersState;
+export type TOrderState = TCreateOrderState & TFeedOrdersState;
 
-// Типы для ответов API
-type TFeedsResponse = {
-  orders: TOrder[];
-  total: number;
-  totalToday: number;
-};
-
-// Начальное состояние
-const initialState: TOrderState = {
+export const initialState: TOrderState = {
   orderData: null,
   orderNumber: null,
   loading: false,
   error: null,
+
   orders: [],
   total: 0,
   totalToday: 0,
   currentOrder: null
 };
 
-// Асинхронные thunk'и
 export const createOrder = createAsyncThunk<
   TOrder,
   string[],
   { rejectValue: string }
 >('order/create', async (ingredients, { rejectWithValue }) => {
   try {
-    // Сначала получаем ответ без типизации
     const response = await orderBurgerApi(ingredients);
-
-    // Проверяем успешность ответа
     if (!response.success) {
       return rejectWithValue('Failed to create order');
     }
-
-    // Создаем объект TOrder вручную из данных ответа
-    const order: TOrder = {
-      _id: response.order._id,
-      number: response.order.number,
-      name: response.order.name,
-      status: response.order.status,
-      createdAt: response.order.createdAt,
-      updatedAt: response.order.updatedAt,
-      ingredients: ingredients // Используем переданные ингредиенты
-    };
-
-    return order;
+    return response.order;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Network error');
     }
     return rejectWithValue('Network error');
   }
 });
 
-export const getFeeds = createAsyncThunk<
-  TFeedsResponse,
-  void,
-  { rejectValue: string }
->('order/feeds', async (_, { rejectWithValue }) => {
-  try {
-    const response = await getFeedsApi();
-    return response;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Failed to fetch feeds');
-  }
-});
+export const getFeeds = createAsyncThunk(
+  'feeds',
+  async () => await getFeedsApi()
+);
 
-export const getOrders = createAsyncThunk<
-  TOrder[],
-  void,
-  { rejectValue: string }
->('order/userOrders', async (_, { rejectWithValue }) => {
-  try {
-    const response = await getOrdersApi();
-    return response;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Failed to fetch orders');
-  }
-});
+export const getOrders = createAsyncThunk(
+  'user/orders',
+  async () => await getOrdersApi()
+);
 
-export const getOrderByNumber = createAsyncThunk<
-  { orders: TOrder[] },
-  number,
-  { rejectValue: string }
->('order/byNumber', async (number, { rejectWithValue }) => {
-  try {
-    const response = await getOrderByNumberApi(number);
-    return response;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Failed to fetch order');
-  }
-});
+export const getOrderByNumber = createAsyncThunk(
+  'user/orderbyNumber',
+  async (number: number) => await getOrderByNumberApi(number)
+);
 
-// Создание slice
-const orderSlice = createSlice({
+export const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
@@ -150,7 +77,6 @@ const orderSlice = createSlice({
       state.orderData = null;
       state.orderNumber = null;
       state.error = null;
-      state.loading = false;
     },
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
@@ -158,7 +84,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // createOrder
       .addCase(createOrder.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -170,50 +95,28 @@ const orderSlice = createSlice({
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Error creating order';
+        const payload = action.payload;
+        state.error =
+          typeof payload === 'string' ? payload : 'Error creating order';
       })
 
-      // getFeeds
-      .addCase(getFeeds.pending, (state) => {
-        state.error = null;
-      })
       .addCase(getFeeds.fulfilled, (state, action) => {
         state.orders = action.payload.orders;
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
       })
-      .addCase(getFeeds.rejected, (state, action) => {
-        state.error = action.payload || 'Error fetching feeds';
-      })
 
-      // getOrders
-      .addCase(getOrders.pending, (state) => {
-        state.error = null;
-      })
       .addCase(getOrders.fulfilled, (state, action) => {
         state.orders = action.payload;
       })
-      .addCase(getOrders.rejected, (state, action) => {
-        state.error = action.payload || 'Error fetching orders';
-      })
 
-      // getOrderByNumber
-      .addCase(getOrderByNumber.pending, (state) => {
-        state.error = null;
-      })
       .addCase(getOrderByNumber.fulfilled, (state, action) => {
         if (action.payload.orders.length > 0) {
           state.currentOrder = action.payload.orders[0];
-        } else {
-          state.currentOrder = null;
         }
-      })
-      .addCase(getOrderByNumber.rejected, (state, action) => {
-        state.error = action.payload || 'Error fetching order';
       });
   }
 });
 
-// Экспорт экшенов и редьюсера
 export const { clearOrder, clearCurrentOrder } = orderSlice.actions;
 export default orderSlice.reducer;

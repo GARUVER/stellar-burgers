@@ -9,22 +9,8 @@ import { orderBurgerApi } from '../../utils/burger-api';
 import { RootState } from '../../services/store';
 import { nanoid } from '@reduxjs/toolkit';
 
-// Тип для ответа от API создания заказа
-type TCreateOrderApiResponse = {
-  success: boolean;
-  order: {
-    _id: string;
-    number: number;
-    name: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  name: string;
-};
-
-type TConstructorState = {
-  bun: TIngredient | null;
+export type TConstructorState = {
+  bun: TConstructorIngredient | null;
   ingredients: TConstructorIngredient[];
 
   orderRequest: boolean;
@@ -46,35 +32,20 @@ export const makeOrder = createAsyncThunk<
   { rejectValue: string }
 >('constructor/makeOrder', async (ingredientsIds, { rejectWithValue }) => {
   try {
-    const response = (await orderBurgerApi(
-      ingredientsIds
-    )) as unknown as TCreateOrderApiResponse;
-
+    const response = await orderBurgerApi(ingredientsIds);
     if (!response.success) {
       return rejectWithValue('Failed to create order');
     }
-
-    // Создаем объект TOrder из данных ответа
-    const order: TOrder = {
-      _id: response.order._id,
-      number: response.order.number,
-      name: response.order.name,
-      status: response.order.status,
-      createdAt: response.order.createdAt,
-      updatedAt: response.order.updatedAt,
-      ingredients: ingredientsIds // Используем переданные ID ингредиентов
-    };
-
-    return order;
+    return response.order;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Network error');
     }
     return rejectWithValue('Network error');
   }
 });
 
-const constructorSlice = createSlice({
+export const constructorSlice = createSlice({
   name: 'constructor',
   initialState,
   reducers: {
@@ -133,7 +104,9 @@ const constructorSlice = createSlice({
       })
       .addCase(makeOrder.rejected, (state, action) => {
         state.orderRequest = false;
-        state.error = action.payload || 'Failed to create order';
+        const payload = action.payload;
+        state.error =
+          typeof payload === 'string' ? payload : 'Failed to create order';
       });
   }
 });

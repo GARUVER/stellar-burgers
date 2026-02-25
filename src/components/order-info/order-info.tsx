@@ -1,15 +1,13 @@
 import { FC, useMemo, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from '../../services/store';
-
-import { TIngredient } from '@utils-types';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-
+import { TIngredient } from '@utils-types';
+import { useSelector, useDispatch } from '../../services/store';
+import { useParams } from 'react-router-dom';
 import {
   getOrderByNumber,
   clearCurrentOrder
-} from '../../services/slices/order-slice';
+} from '../..//services/slices/order-slice';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
@@ -20,25 +18,20 @@ export const OrderInfo: FC = () => {
     (state) => state.ingredients.ingredients
   );
 
-  // Загрузка данных заказа при монтировании
   useEffect(() => {
     if (number) {
       dispatch(getOrderByNumber(Number(number)));
     }
-
-    // Очистка при размонтировании
     return () => {
       dispatch(clearCurrentOrder());
     };
   }, [number, dispatch]);
 
-  // Подготовка данных для отображения
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
     const date = new Date(orderData.createdAt);
 
-    // Группировка ингредиентов с подсчетом количества
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
@@ -48,7 +41,10 @@ export const OrderInfo: FC = () => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
           if (ingredient) {
-            acc[item] = { ...ingredient, count: 1 };
+            acc[item] = {
+              ...ingredient,
+              count: 1
+            };
           }
         } else {
           acc[item].count++;
@@ -58,7 +54,6 @@ export const OrderInfo: FC = () => {
       {}
     );
 
-    // Общая стоимость заказа
     const total = Object.values(ingredientsInfo).reduce(
       (acc, item) => acc + item.price * item.count,
       0

@@ -27,6 +27,7 @@ export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
             price={ingredient.price}
             thumbnail={ingredient.image}
             handleClose={handleClose}
+            data-cy={`close-${ingredient._id}`}
           />
         </div>
       </li>
