@@ -13,11 +13,10 @@ interface TConstructorIngredient extends TIngredient {
   id: string;
 }
 
-const getState = (): TConstructorState => ({ ...initialState });
-
-const bun: TIngredient = {
+// Константы с данными ингредиентов
+const BUN: TIngredient = {
   _id: '643d69a5c3f7b9001cfa093c',
-  name: 'Краторная булка N-200igogo',
+  name: 'Краторная булка N-200i',
   type: 'bun',
   proteins: 80,
   fat: 24,
@@ -29,7 +28,7 @@ const bun: TIngredient = {
   image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png'
 };
 
-const mainIngredient: TIngredient = {
+const MAIN_INGREDIENT: TIngredient = {
   _id: '643d69a5c3f7b9001cfa0941',
   name: 'Биокотлета из марсианской Магнолии',
   type: 'main',
@@ -43,7 +42,7 @@ const mainIngredient: TIngredient = {
   image_large: 'https://code.s3.yandex.net/react/code/meat-01-large.png'
 };
 
-const sauceIngredient: TIngredient = {
+const SAUCE_INGREDIENT: TIngredient = {
   _id: '643d69a5c3f7b9001cfa0942',
   name: 'Соус Spicy-X',
   type: 'sauce',
@@ -57,13 +56,42 @@ const sauceIngredient: TIngredient = {
   image_large: 'https://code.s3.yandex.net/react/code/sauce-02-large.png'
 };
 
+// Константы для ID ингредиентов в конструкторе
+const CONSTRUCTOR_INGREDIENTS = {
+  BUN_ID: 'bun_id',
+  MAIN_ID_1: 'id1',
+  MAIN_ID_2: 'id2',
+  MAIN_ID_3: 'id3',
+  NON_EXISTENT_ID: 'nonexistent-id'
+} as const;
+
+// Вспомогательная функция для создания состояния с ингредиентами
+const createStateWithIngredients = (
+  ingredients: Array<Partial<TConstructorIngredient>> = []
+): TConstructorState => ({
+  ...initialState,
+  ingredients: ingredients as TConstructorIngredient[]
+});
+
+// Вспомогательная функция для создания состояния с булкой и начинками
+const createStateWithBunAndIngredients = (
+  bunId: string = CONSTRUCTOR_INGREDIENTS.BUN_ID,
+  ingredients: Array<Partial<TConstructorIngredient>> = []
+): TConstructorState => ({
+  ...initialState,
+  bun: { id: bunId, ...BUN } as TConstructorIngredient,
+  ingredients: ingredients as TConstructorIngredient[]
+});
+
+const getState = (): TConstructorState => ({ ...initialState });
+
 describe('Тесты редьюсера конструктора бургера', () => {
   test('Добавление ингредиента (начинки)', () => {
     const stateBefore = getState();
-    const action = addIngredient(mainIngredient);
+    const action = addIngredient(MAIN_INGREDIENT);
     const preparedPayload: TConstructorIngredient = action.payload;
     expect(preparedPayload.id).toBeDefined();
-    expect(preparedPayload._id).toBe(mainIngredient._id);
+    expect(preparedPayload._id).toBe(MAIN_INGREDIENT._id);
 
     const stateAfter = reducer(stateBefore, action);
     expect(stateAfter.bun).toBeNull();
@@ -73,7 +101,7 @@ describe('Тесты редьюсера конструктора бургера'
 
   test('Добавление булки', () => {
     const stateBefore = getState();
-    const action = addIngredient(bun);
+    const action = addIngredient(BUN);
     const preparedPayload: TConstructorIngredient = action.payload;
     expect(preparedPayload.id).toBeDefined();
 
@@ -83,74 +111,65 @@ describe('Тесты редьюсера конструктора бургера'
   });
 
   test('Удаление ингредиента (начинки)', () => {
-    const stateWithIngredients: TConstructorState = {
-      ...initialState,
-      ingredients: [
-        { id: 'id1', ...mainIngredient },
-        { id: 'id2', ...sauceIngredient }
-      ]
-    };
+    const stateWithIngredients = createStateWithIngredients([
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_1, ...MAIN_INGREDIENT },
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_2, ...SAUCE_INGREDIENT }
+    ]);
 
-    const idToRemove = 'id1';
-    const action = removeIngredient(idToRemove);
+    const action = removeIngredient(CONSTRUCTOR_INGREDIENTS.MAIN_ID_1);
     const stateAfter = reducer(stateWithIngredients, action);
     expect(stateAfter.ingredients).toHaveLength(1);
-    expect(stateAfter.ingredients[0].id).toBe('id2');
+    expect(stateAfter.ingredients[0].id).toBe(CONSTRUCTOR_INGREDIENTS.MAIN_ID_2);
     expect(stateAfter.bun).toBeNull();
   });
 
   test('Удаление ингредиента из пустого списка', () => {
     const stateBefore = getState();
-    const idToRemove = 'nonexistent-id';
-    const action = removeIngredient(idToRemove);
+    const action = removeIngredient(CONSTRUCTOR_INGREDIENTS.NON_EXISTENT_ID);
     const stateAfter = reducer(stateBefore, action);
     expect(stateAfter.ingredients).toHaveLength(0);
     expect(stateAfter.bun).toBeNull();
   });
 
   test('Изменение порядка ингредиентов в начинке (moveIngredient)', () => {
-    const stateWithIngredients: TConstructorState = {
-      ...initialState,
-      ingredients: [
-        { id: 'id1', ...mainIngredient },
-        { id: 'id2', ...sauceIngredient }
-      ]
-    };
+    const stateWithIngredients = createStateWithIngredients([
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_1, ...MAIN_INGREDIENT },
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_2, ...SAUCE_INGREDIENT }
+    ]);
 
     const action = moveIngredient({ fromIndex: 1, toIndex: 0 });
     const stateAfter = reducer(stateWithIngredients, action);
-    expect(stateAfter.ingredients.map((i) => i.id)).toEqual(['id2', 'id1']);
+    expect(stateAfter.ingredients.map((i) => i.id)).toEqual([
+      CONSTRUCTOR_INGREDIENTS.MAIN_ID_2,
+      CONSTRUCTOR_INGREDIENTS.MAIN_ID_1
+    ]);
     expect(stateAfter.bun).toBeNull();
   });
 
   test('Изменение порядка ингредиентов: перемещение в конец', () => {
-    const stateWithIngredients: TConstructorState = {
-      ...initialState,
-      ingredients: [
-        { id: 'id1', ...mainIngredient },
-        { id: 'id2', ...sauceIngredient },
-        { id: 'id3', ...bun }
-      ]
-    };
+    const stateWithIngredients = createStateWithIngredients([
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_1, ...MAIN_INGREDIENT },
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_2, ...SAUCE_INGREDIENT },
+      { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_3, ...BUN }
+    ]);
 
     const action = moveIngredient({ fromIndex: 0, toIndex: 2 });
     const stateAfter = reducer(stateWithIngredients, action);
     expect(stateAfter.ingredients.map((i) => i.id)).toEqual([
-      'id2',
-      'id3',
-      'id1'
+      CONSTRUCTOR_INGREDIENTS.MAIN_ID_2,
+      CONSTRUCTOR_INGREDIENTS.MAIN_ID_3,
+      CONSTRUCTOR_INGREDIENTS.MAIN_ID_1
     ]);
   });
 
   test('Очистка конструктора (clearConstructor)', () => {
-    const stateWithIngredients: TConstructorState = {
-      ...initialState,
-      bun: { id: 'bun_id', ...bun },
-      ingredients: [
-        { id: 'id1', ...mainIngredient },
-        { id: 'id2', ...sauceIngredient }
+    const stateWithIngredients = createStateWithBunAndIngredients(
+      CONSTRUCTOR_INGREDIENTS.BUN_ID,
+      [
+        { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_1, ...MAIN_INGREDIENT },
+        { id: CONSTRUCTOR_INGREDIENTS.MAIN_ID_2, ...SAUCE_INGREDIENT }
       ]
-    };
+    );
 
     const action = clearConstructor();
     const stateAfter = reducer(stateWithIngredients, action);
