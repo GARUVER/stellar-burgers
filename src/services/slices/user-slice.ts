@@ -1,6 +1,4 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { deleteCookie, setCookie } from '../../utils/cookie';
-
 import { TUser } from '../../utils/types';
 import {
   getUserApi,
@@ -11,8 +9,9 @@ import {
   TRegisterData,
   updateUserApi
 } from '../../utils/burger-api';
+import { deleteCookie, setCookie } from '../../utils/cookie';
 
-type TUserState = {
+export type TUserState = {
   user: TUser | null;
   loading: boolean;
   error: string | null;
@@ -28,7 +27,6 @@ export const initialState: TUserState = {
   isAuthenticated: false
 };
 
-// Регистрация пользователя
 export const registerUser = createAsyncThunk<
   { user: TUser; accessToken: string; refreshToken: string },
   TRegisterData,
@@ -50,7 +48,6 @@ export const registerUser = createAsyncThunk<
   }
 });
 
-// Вход пользователя
 export const loginUser = createAsyncThunk<
   { user: TUser; accessToken: string; refreshToken: string },
   TLoginData,
@@ -72,7 +69,6 @@ export const loginUser = createAsyncThunk<
   }
 });
 
-// Получение данных пользователя
 export const fetchUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
   'user/fetch',
   async (_, { rejectWithValue }) => {
@@ -91,7 +87,6 @@ export const fetchUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
   }
 );
 
-// Обновление данных пользователя
 export const updateUser = createAsyncThunk<
   TUser,
   Partial<TRegisterData>,
@@ -111,7 +106,6 @@ export const updateUser = createAsyncThunk<
   }
 });
 
-// Выход пользователя
 export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   'user/logout',
   async (_, { rejectWithValue }) => {
@@ -128,7 +122,7 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   }
 );
 
-const userSlice = createSlice({
+export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
@@ -143,7 +137,6 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -162,7 +155,6 @@ const userSlice = createSlice({
         state.isAuthChecked = true;
       })
 
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -180,7 +172,6 @@ const userSlice = createSlice({
         state.isAuthChecked = true;
       })
 
-      // Fetch user
       .addCase(fetchUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -199,12 +190,10 @@ const userSlice = createSlice({
         state.isAuthChecked = true;
       })
 
-      // Update user
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
 
-      // Logout
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
@@ -220,4 +209,5 @@ const userSlice = createSlice({
 });
 
 export const { clearUser, setAuthChecked } = userSlice.actions;
+
 export default userSlice.reducer;

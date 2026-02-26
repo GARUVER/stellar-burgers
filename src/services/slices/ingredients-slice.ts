@@ -1,10 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getIngredientsApi } from '@api';
-
 import { TIngredient } from '../../utils/types';
 import { RootState } from '../store';
 
-type TIngredientsState = {
+export type TIngredientsState = {
   ingredients: TIngredient[];
   isIngredientsLoading: boolean;
   error: string | null;
@@ -16,7 +15,6 @@ export const initialState: TIngredientsState = {
   error: null
 };
 
-// Получение списка ингредиентов
 export const fetchIngredients = createAsyncThunk<
   TIngredient[],
   void,
@@ -33,13 +31,12 @@ export const fetchIngredients = createAsyncThunk<
   }
 });
 
-const ingredientsSlice = createSlice({
+export const ingredientsSlice = createSlice({
   name: 'ingredients',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Загрузка ингредиентов
       .addCase(fetchIngredients.pending, (state) => {
         state.isIngredientsLoading = true;
         state.error = null;
@@ -57,7 +54,6 @@ const ingredientsSlice = createSlice({
   }
 });
 
-// Селектор для получения состояния ингредиентов
 export const getIngredientState = (state: RootState): TIngredientsState =>
   state.ingredients;
 

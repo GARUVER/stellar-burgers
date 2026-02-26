@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
-import { RootState } from 'src/services/store'; // путь к твоему store
+import { RootState } from 'src/services/store';
 
 export enum AccessMode {
-  AuthenticatedOnly, // Только для авторизованных
-  UnauthenticatedOnly // Только для неавторизованных
+  AuthenticatedOnly,
+  UnauthenticatedOnly
 }
 
 type ProtectedRouteProps = {
@@ -12,7 +12,6 @@ type ProtectedRouteProps = {
   accessMode?: AccessMode;
 };
 
-// Селектор для получения состояния пользователя
 const selectUserState = (state: RootState) => ({
   user: state.user.user,
   isAuthChecked: state.user.isAuthChecked
@@ -25,9 +24,8 @@ export const ProtectedRoute = ({
   const location = useLocation();
   const { user, isAuthChecked } = useSelector(selectUserState);
 
-  // Ждём завершения проверки авторизации
   if (!isAuthChecked) {
-    return <p>Загрузка...</p>; // или спиннер
+    return <p>Загрузка...</p>;
   }
 
   const isAuthenticated = !!user;
